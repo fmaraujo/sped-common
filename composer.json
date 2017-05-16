@@ -50,12 +50,7 @@
             "NFePHP\\Common\\Tests\\": "tests/"
         }
     },
-    "extra": {
-        "branch-alias": {
-            "dev-v5.0": "5.0-dev"
-        }
-    },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "scripts": {
         "test": "phpunit -c phpunit.xml.dist",
         "cs": "phpcs --standard=PSR2 src"
