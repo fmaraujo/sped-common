@@ -7,9 +7,21 @@ use Countable;
 
 class ExceptionCollection extends \Exception implements ExceptionInterface, IteratorAggregate, Countable
 {
-    protected $exceptions = array();
+    /**
+     * @var array
+     */
+    protected $exceptions = [];
+    /**
+     * @var string
+     */
     private $shortMessage;
     
+    /**
+     * Constructor
+     * @param string $message
+     * @param int $code
+     * @param \Exception $previous
+     */
     public function __construct($message = '', $code = 0, \Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
@@ -19,7 +31,7 @@ class ExceptionCollection extends \Exception implements ExceptionInterface, Iter
     /**
      * Set all of the exceptions
      * @param array $exceptions Array of exceptions
-     * @return ExceptionCollection;
+     * @return ExceptionCollection
      */
     public function setExceptions(array $exceptions)
     {
@@ -32,8 +44,8 @@ class ExceptionCollection extends \Exception implements ExceptionInterface, Iter
     
     /**
      * Add exceptions to the collection
-     * @param ExceptionCollection|\Exception $e Exception to add
-     * @return ExceptionCollection;
+     * @param \Exception $exception Exception to add
+     * @return \NFePHP\Common\Exception\ExceptionCollection
      */
     public function add(\Exception $exception)
     {
@@ -69,6 +81,10 @@ class ExceptionCollection extends \Exception implements ExceptionInterface, Iter
         return $this->exceptions ? $this->exceptions[0] : null;
     }
     
+    /**
+     * Convert to string
+     * @return string
+     */
     public function __toString()
     {
         $messages = array_map(function (\Exception $exception) {

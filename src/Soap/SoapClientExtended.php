@@ -6,7 +6,7 @@ use SoapClient;
 
 class SoapClientExtended extends SoapClient
 {
-   /**
+    /**
      * __construct
      * @param mixed $wsdl NULL for non-wsdl mode or URL string for wsdl mode
      * @param array $options

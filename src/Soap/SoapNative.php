@@ -19,11 +19,19 @@ use NFePHP\Common\Soap\SoapClientExtended;
 use NFePHP\Common\Soap\SoapBase;
 use NFePHP\Common\Soap\SoapInterface;
 use NFePHP\Common\Exception\SoapException;
+use Exception;
+use SoapHeader;
+use SoapFault;
 use NFePHP\Common\Certificate;
 use Psr\Log\LoggerInterface;
 
 class SoapNative extends SoapBase implements SoapInterface
 {
+    /**
+     * @var SoapClientExtended
+     */
+    protected $connection;
+
     /**
      * Constructor
      * @param Certificate $certificate
@@ -43,9 +51,9 @@ class SoapNative extends SoapBase implements SoapInterface
      * @param array $parameters
      * @param array $namespaces
      * @param string $request
-     * @param \SOAPHeader $soapheader
+     * @param \SoapHeader $soapheader
      * @return string
-     * @throws \NFePHP\Common\Exception\SoapException
+     * @throws SoapException
      */
     public function send(
         $url,
@@ -62,7 +70,7 @@ class SoapNative extends SoapBase implements SoapInterface
             if (!empty($soapheader)) {
                 $this->connection->__setSoapHeaders(array($soapheader));
             }
-            $response = $this->connection->$operation($parameters);
+            $this->connection->$operation($parameters);
             $this->requestHead = $this->connection->__getLastRequestHeaders();
             $this->requestBody = $this->connection->__getLastRequest();
             $this->responseHead = $this->connection->__getLastResponseHeaders();
@@ -73,9 +81,9 @@ class SoapNative extends SoapBase implements SoapInterface
                 $this->responseHead . "\n" . $this->responseBody
             );
         } catch (SoapFault $e) {
-            throw SoapException::soapFault($e->getMessage());
-        } catch (Exception $e) {
-            throw SoapException::soapFault($e->getMessage());
+            throw SoapException::soapFault("[$url] " . $e->getMessage());
+        } catch (\Exception $e) {
+            throw SoapException::soapFault("[$url] " . $e->getMessage());
         }
         return $this->responseBody;
     }
@@ -84,20 +92,20 @@ class SoapNative extends SoapBase implements SoapInterface
      * Prepare connection
      * @param string $url
      * @param int $soapver
-     * @throws RuntimeException
-     * @throws \NFePHP\Common\Exception\SoapException
+     * @throws SoapException
      */
     protected function prepare($url, $soapver = SOAP_1_2)
     {
         $wsdl = "$url?WSDL";
         $verifypeer = true;
+        $verifyhost = true;
         if ($this->disablesec) {
             $verifypeer = false;
             $verifyhost = false;
         }
+        $this->saveTemporarilyKeyFiles();
         $params = [
             'local_cert' => $this->tempdir . $this->certfile,
-            'passphrase' => '',
             'connection_timeout' => $this->soaptimeout,
             'encoding' => 'UTF-8',
             'verifypeer' => $verifypeer,
@@ -106,12 +114,15 @@ class SoapNative extends SoapBase implements SoapInterface
             'trace' => true,
             'cache_wsdl' => WSDL_CACHE_NONE
         ];
-        $this->setNativeProxy($params);
+        if (!empty($this->temppass)) {
+            $params['passphrase'] = $this->temppass;
+        }
+        $params = $this->setNativeProxy($params);
         try {
             $this->connection = new SoapClientExtended($wsdl, $params);
         } catch (SoapFault $e) {
             throw SoapException::soapFault($e->getMessage());
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw SoapException::soapFault($e->getMessage());
         }
     }
@@ -119,8 +130,9 @@ class SoapNative extends SoapBase implements SoapInterface
     /**
      * Set parameters for proxy
      * @param array $params
+     * @return array
      */
-    private function setNativeProxy(&$params)
+    private function setNativeProxy($params)
     {
         if ($this->proxyIP != '') {
             $pproxy1 = [
@@ -136,5 +148,6 @@ class SoapNative extends SoapBase implements SoapInterface
             ];
             array_push($params, $pproxy2);
         }
+        return $params;
     }
 }

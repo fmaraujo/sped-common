@@ -37,6 +37,13 @@ class StringsTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($xmlLimpo, $resp1);
     }
     
+    public function testOnlyNumbers()
+    {
+        $expected = '123657788';
+        $actual = Strings::onlyNumbers('123-65af77./88 Ç $#');
+        $this->assertEquals($expected, $actual);
+    }
+    
     public function testRandomString()
     {
         $str = Strings::randomString(10);
@@ -52,6 +59,18 @@ class StringsTest extends \PHPUnit\Framework\TestCase
         $end = '?>';
         $actual = Strings::deleteAllBetween($str, $beginning, $end);
         $expected = "<soap:Envelope><soap:Body></soap:Body></soap:Envelope>";
+        $this->assertEquals($expected, $actual);
+    }
+    
+    public function testRemoveSomeAlienCharsfromTxt()
+    {
+        $txt = "C|PLASTFOAM                   IND. E       COM DE PLASTICOS LTDA|PLASTFOAM| 336546371113||184394 |2222600|3 |\n";
+        $txt .= "V|\r\n";
+        $txt .= "ZV|\t\n";
+        $actual = Strings::removeSomeAlienCharsfromTxt($txt);
+        $expected = "C|PLASTFOAM IND. E COM DE PLASTICOS LTDA|PLASTFOAM|336546371113||184394|2222600|3|\n";
+        $expected .= "V|\n";
+        $expected .= "ZV|\n";
         $this->assertEquals($expected, $actual);
     }
 }

@@ -28,8 +28,18 @@ class Strings
         $aSubs = ['e','a','a','a','a','e','e','i','o','o','o','u','u',
             'c','A','A','A','A','E','E','I','O','O','O','U','U','C'];
         $newstr = str_replace($aFind, $aSubs, $string);
-        $newstr = preg_replace("/[^a-zA-Z0-9 @,-.;:\/]/", "", $newstr);
+        $newstr = preg_replace("/[^a-zA-Z0-9 @,-_.;:\/]/", "", $newstr);
         return $newstr;
+    }
+    
+    /**
+     * Remove all non numeric characters from string
+     * @param string $string
+     * @return string
+     */
+    public static function onlyNumbers($string)
+    {
+        return preg_replace("/[^0-9]/", "", $string);
     }
     
     /**
@@ -93,6 +103,22 @@ class Strings
             );
         }
         return $procXML;
+    }
+    
+    /**
+     * Remove some alien chars from txt
+     * @param string $txt
+     * @return string
+     */
+    public static function removeSomeAlienCharsfromTxt($txt)
+    {
+        //remove CRs and TABs
+        $txt = str_replace(["\r","\t"], "", $txt);
+        //remove multiple spaces
+        $txt = preg_replace('/(?:\s\s+)/', ' ', $txt);
+        //remove spaces at begin and end of fields
+        $txt = str_replace(["| "," |"], "|", $txt);
+        return $txt;
     }
     
     /**

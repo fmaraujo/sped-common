@@ -3,7 +3,7 @@
 namespace NFePHP\Common\Certificate;
 
 /**
- * Class for management and use of digital certificates A1 (PKCS # 12)
+ * Management and use of digital certificates A1 (PKCS # 12).
  * @category   NFePHP
  * @package    NFePHP\Common\PublicKey
  * @copyright  Copyright (c) 2008-2016
@@ -13,7 +13,6 @@ namespace NFePHP\Common\Certificate;
  */
 
 use NFePHP\Common\Exception\CertificateException;
-use NFePHP\Common\Certificate\Asn1;
 
 class PublicKey implements VerificationInterface
 {
@@ -42,7 +41,7 @@ class PublicKey implements VerificationInterface
      */
     public $emailAddress;
     /**
-     * @var string
+     * @var string Cryptographic Service Provider
      */
     public $cspName;
     /**
@@ -63,7 +62,7 @@ class PublicKey implements VerificationInterface
     /**
      * Load class with certificate content
      * @param string $content
-     * @return \static
+     * @return \NFePHP\Common\Certificate\PublicKey
      */
     public static function createFromContent($content)
     {
@@ -92,10 +91,14 @@ CONTENT;
         }
         $detail = openssl_x509_parse($resource, false);
         $this->commonName = $detail['subject']['commonName'];
-        $this->emailAddress = !empty($detail['subject']['emailAddress']) ?
-            $detail['subject']['emailAddress'] :
-            '';
-        $this->cspName = $detail['issuer']['organizationalUnitName'];
+        if (isset($detail['subject']['emailAddress'])) {
+            $this->emailAddress = $detail['subject']['emailAddress'];
+        }
+        if (isset($detail['issuer']['organizationalUnitName'])) {
+            $this->cspName = is_array($detail['issuer']['organizationalUnitName'])
+                ? implode(', ', $detail['issuer']['organizationalUnitName'])
+                : $detail['issuer']['organizationalUnitName'];
+        }
         $this->serialNumber = $detail['serialNumber'];
         $this->validFrom = \DateTime::createFromFormat('ymdHis\Z', $detail['validFrom']);
         $this->validTo = \DateTime::createFromFormat('ymdHis\Z', $detail['validTo']);
@@ -108,16 +111,16 @@ CONTENT;
      * @param string $data
      * @param string $signature
      * @param int $algorithm [optional] For more information see the list of Signature Algorithms.
-     * @return int Returns true if the signature is correct, false if it is incorrect
+     * @return bool Returns true if the signature is correct, false if it is incorrect
      * @throws CertificateException An error has occurred when verify signature
      */
     public function verify($data, $signature, $algorithm = OPENSSL_ALGO_SHA1)
     {
         $verified = openssl_verify($data, $signature, $this->rawKey, $algorithm);
-        if ($verified === static::SIGNATURE_ERROR) {
+        if ($verified === self::SIGNATURE_ERROR) {
             throw CertificateException::signatureFailed();
         }
-        return $verified === static::SIGNATURE_CORRECT;
+        return $verified === self::SIGNATURE_CORRECT;
     }
 
     /**

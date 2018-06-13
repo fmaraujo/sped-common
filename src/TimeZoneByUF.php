@@ -57,10 +57,10 @@ class TimeZoneByUF
     {
         $uf = strtoupper($uf);
         if (is_numeric($uf)) {
-            $uf = UFList::getUFByCode($uf);
+            $uf = UFList::getUFByCode((int) $uf);
         }
         //only for validation, if $uf dont exists throws exception
-        $code = UFList::getCodeByUF($uf);
+        UFList::getCodeByUF($uf);
         return self::$tzd[$uf];
     }
 }

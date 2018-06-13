@@ -40,7 +40,7 @@ class CertificationChain
     
     /**
      * Add new certificate to certification chain
-     * @param string $contente Certificate in DER, CER or PEM format
+     * @param string $content Certificate in DER, CER or PEM format
      * @return array
      */
     public function add($content)
@@ -112,7 +112,7 @@ CONTENT;
         foreach ($list as $cert) {
             $ec[] = "{$cert}";
         }
-        if (empty($ec)) {
+        if (!empty($ec)) {
             $args = ['extracerts' => $ec];
         }
         return $args;
