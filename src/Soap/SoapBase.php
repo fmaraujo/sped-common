@@ -177,7 +177,11 @@ abstract class SoapBase implements SoapInterface
      */
     public function __destruct()
     {
-        $this->removeTemporarilyFiles();
+        try {
+            $this->removeTemporarilyFiles();
+        }
+        catch (\Exception $e) {
+        }
     }
 
     /**
