@@ -1,4 +1,5 @@
 <?php
+
 namespace NFePHP\Common\Soap;
 
 use NFePHP\Common\Certificate;
@@ -13,7 +14,7 @@ use Psr\Log\LoggerInterface;
  *
  * @category  NFePHP
  * @package   NFePHP\Common\Soap\SoapBase
- * @copyright NFePHP Copyright (c) 2017
+ * @copyright NFePHP Copyright (c) 2017-2019
  * @author    Roberto L. Machado <linux.rlm at gmail dot com>
  * @license   http://www.gnu.org/licenses/lgpl.txt LGPLv3+
  * @license   https://opensource.org/licenses/MIT MIT
@@ -111,6 +112,10 @@ abstract class SoapBase implements SoapInterface
      */
     protected $encriptPrivateKey = false;
     /**
+     * @var integer
+     */
+    protected $httpver;
+    /**
      * @var bool
      */
     protected $debugmode = false;
@@ -198,6 +203,28 @@ abstract class SoapBase implements SoapInterface
     public function disableCertValidation($flag = true)
     {
         return $this->disableCertValidation = $flag;
+    }
+
+    /**
+     * Force http protocol version
+     *
+     * @param null|string $version
+     */
+    public function httpVersion($version = null)
+    {
+        switch ($version) {
+            case '1.0':
+                $this->httpver = CURL_HTTP_VERSION_1_0;
+                break;
+            case '1.1':
+                $this->httpver = CURL_HTTP_VERSION_1_1;
+                break;
+            case '2.0':
+                $this->httpver = CURL_HTTP_VERSION_2_0;
+                break;
+            default:
+                $this->httpver = CURL_HTTP_VERSION_NONE;
+        }
     }
 
     /**
@@ -539,18 +566,9 @@ abstract class SoapBase implements SoapInterface
             return;
         }
         //remove os certificados
-        if ($this->filesystem->has($this->certfile)) {
-            $this->filesystem->delete($this->certfile);
-        }
-
-        if ($this->filesystem->has($this->prifile)) {
-            $this->filesystem->delete($this->prifile);
-        }
-
-        if ($this->filesystem->has($this->pubfile)) {
-            $this->filesystem->delete($this->pubfile);
-        }
-
+        $this->filesystem->delete($this->certfile);
+        $this->filesystem->delete($this->prifile);
+        $this->filesystem->delete($this->pubfile);
         //remove todos os arquivos antigos
         $contents = $this->filesystem->listContents($this->certsdir, true);
         $dt = new \DateTime();
@@ -560,7 +578,7 @@ abstract class SoapBase implements SoapInterface
         foreach ($contents as $item) {
             if ($item['type'] == 'file') {
                 $timestamp = $this->filesystem->getTimestamp($item['path']);
-                if ($timestamp < $tsLimit && $this->filesystem->has($item['path'])) {
+                if ($timestamp < $tsLimit) {
                     $this->filesystem->delete($item['path']);
                 }
             }
