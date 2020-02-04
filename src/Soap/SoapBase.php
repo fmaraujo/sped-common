@@ -250,7 +250,7 @@ abstract class SoapBase implements SoapInterface
         $this->encriptPrivateKey = $encript;
         return $this->encriptPrivateKey;
     }
-   
+
     /**
      * Set another temporayfolder for saving certificates for SOAP utilization
      * @param string | null $folderRealPath
@@ -272,7 +272,7 @@ abstract class SoapBase implements SoapInterface
         $this->tempdir = $folderRealPath;
         $this->setLocalFolder($folderRealPath);
     }
-    
+
     /**
      * Return uid from user
      * @return string
@@ -285,7 +285,7 @@ abstract class SoapBase implements SoapInterface
             return getmyuid();
         }
     }
- 
+
     /**
      * Set Local folder for flysystem
      * @param string $folder
@@ -405,7 +405,7 @@ abstract class SoapBase implements SoapInterface
      * @param \SoapHeader $header
      * @return string
      */
-    protected function makeEnvelopeSoap(
+    public function makeEnvelopeSoap(
         $request,
         $namespaces,
         $soapVer = SOAP_1_2,
@@ -541,7 +541,7 @@ abstract class SoapBase implements SoapInterface
             );
         }
     }
-    
+
     /**
      * Create a unique random file name
      * @param integer $n
